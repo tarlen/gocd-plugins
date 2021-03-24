@@ -14,8 +14,6 @@
         <plugin.version>${project.version}</plugin.version>
         <maven.test.skip>true</maven.test.skip>
 
-        <sonar.java.coveragePlugin>cobertura</sonar.java.coveragePlugin>
-        <sonar.cobertura.reportPath>target/site/cobertura/coverage.xml</sonar.cobertura.reportPath>
         <sonar.language>java</sonar.language>
 
     </properties>
@@ -119,27 +117,6 @@
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <check></check>
-                    <formats>
-                        <!--<format>html</format>-->
-                        <format>xml</format>
-                    </formats>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>cobertura</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>

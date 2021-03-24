@@ -2,14 +2,20 @@
 package com.tw.go.task.sonarqualitygate;
 
 
-import com.thoughtworks.go.plugin.api.task.JobConsoleLogger;
-import com.tw.go.plugin.common.*;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import org.json.JSONException;
-
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.thoughtworks.go.plugin.api.task.JobConsoleLogger;
+import com.tw.go.plugin.common.Context;
+import com.tw.go.plugin.common.GoApiClient;
+import com.tw.go.plugin.common.GoApiConstants;
+import com.tw.go.plugin.common.Result;
+import com.tw.go.plugin.common.TaskExecutor;
 
 public class SonarTaskExecutor extends TaskExecutor {
 
@@ -30,35 +36,28 @@ public class SonarTaskExecutor extends TaskExecutor {
 
             String sonarApiUrl = (String) ((Map)this.config.get(SonarScanTask.SONAR_API_URL)).get(GoApiConstants.PROPERTY_NAME_VALUE);
             log("API Url: " + sonarApiUrl);
+            String sonarApiKey = (String) ((Map)this.config.get(SonarScanTask.SONAR_API_KEY)).get(GoApiConstants.PROPERTY_NAME_VALUE);
             String issueTypeFail = (String) ((Map) this.config.get(SonarScanTask.ISSUE_TYPE_FAIL)).get(GoApiConstants.PROPERTY_NAME_VALUE);
             log("Fail if: " + issueTypeFail);
 
             SonarClient sonarClient = new SonarClient(sonarApiUrl);
-
-//            // This might need some auth!
-//            Map envVars = context.getEnvironmentVariables();
-//            if (envVars.get(GoApiConstants.ENVVAR_NAME_SONAR_USER) != null &&
-//                    envVars.get(GoApiConstants.ENVVAR_NAME_SONAR_USER_PASSWORD) != null) {
-//
-//                sonarClient.setBasicAuthentication(envVars.get(GoApiConstants.ENVVAR_NAME_SONAR_USER).toString(), envVars.get(GoApiConstants.ENVVAR_NAME_SONAR_USER_PASSWORD).toString());
-//                log("Logged in as '" + envVars.get(GoApiConstants.ENVVAR_NAME_SONAR_USER).toString() + "' to get the project's quality gate");
-//            } else {
-//                log(" Requesting project's quality gate anonymously.");
-//            }
+            
+            if (sonarApiKey != null && sonarApiKey.length() > 0) {
+            	sonarClient.setBasicAuthentication(sonarApiKey, "");
+            }
 
             //get quality gate details
+            
             JSONObject result = sonarClient.getProjectWithQualityGateDetails(sonarProjectKey);
             JSONObject project = (JSONObject) result.get("projectStatus");
             JSONArray periods = (JSONArray) project.get("periods");
+            
             JSONObject lastPeriod = (JSONObject) periods.get(periods.length() - 1);
-
             String lastDate = (String) lastPeriod.get("date");
-            String lastVersion = (String) lastPeriod.get("parameter");
-
+            String lastVersion = (String) lastPeriod.optString("parameter", null);
+            
             if (!("".equals(stageName)) && !("".equals(jobName)) && !("".equals(jobCounter))) {
                 String scheduledTime = getScheduledTime();
-
-                
 
                 String resultDate = lastDate;
                 resultDate = new StringBuilder(resultDate).insert(resultDate.length()-2, ":").toString();
@@ -83,7 +82,9 @@ public class SonarTaskExecutor extends TaskExecutor {
                         log("No new scan has been found !");
 
                         log("Date of Sonar scan: " + lastDate);
-                        log("Version of Sonar scan: " + lastVersion);
+                        if (lastVersion != null) {
+                        	log("Version of Sonar scan: " + lastVersion);
+                        }
 
                         return new Result(false, "Failed to get a newer quality gate for " + sonarProjectKey
                                 + ". The present quality gate is older than the start of the Sonar scan task.");
@@ -94,8 +95,9 @@ public class SonarTaskExecutor extends TaskExecutor {
                 }
 
                 log("Date of Sonar scan: " + lastDate);
-                log("Version of Sonar scan: " + lastVersion);
-
+                if (lastVersion != null) {
+                	log("Version of Sonar scan: " + lastVersion);
+                }
                 SonarParser parser = new SonarParser(result);
 
                 // check that a quality gate is returned
@@ -108,8 +110,9 @@ public class SonarTaskExecutor extends TaskExecutor {
             else {
 
                 log("Date of Sonar scan: " + lastDate);
-                log("Version of Sonar scan: " + lastVersion);
-
+                if (lastVersion != null) {
+                	log("Version of Sonar scan: " + lastVersion);
+                }
                 SonarParser parser = new SonarParser(result);
 
                 // check that a quality gate is returned
@@ -120,6 +123,12 @@ public class SonarTaskExecutor extends TaskExecutor {
             }
 
         } catch (Exception e) {
+        	StringWriter sw = new StringWriter();
+        	PrintWriter w = new PrintWriter(sw);
+        	e.printStackTrace(w);
+        	
+        	log("Error:\n" + sw.toString());
+        	
             log("Error during get or parse of quality gate result. Please check if a quality gate is defined\n" + e.getMessage());
             return new Result(false, "Failed to get quality gate for " + sonarProjectKey + ". Please check if a quality gate is defined\n", e);
         }

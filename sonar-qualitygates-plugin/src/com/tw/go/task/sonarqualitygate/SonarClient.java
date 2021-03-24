@@ -1,10 +1,9 @@
 package com.tw.go.task.sonarqualitygate;
 
-import org.json.JSONArray;
+import java.security.GeneralSecurityException;
+
 import org.json.JSONObject;
 
-import java.io.*;
-import java.security.GeneralSecurityException;
 import com.tw.go.plugin.common.ApiRequestBase;
 
 
@@ -24,6 +23,8 @@ public class SonarClient extends ApiRequestBase {
         uri = String.format(uri, projectKey);
         String resultData = requestGet(uri);
 
+//        SonarTaskExecutor.getLogger().printLine("API Result: " + resultData);
+        
         JSONObject jsonObject = new JSONObject(resultData);
 
         return jsonObject;

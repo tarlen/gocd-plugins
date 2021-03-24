@@ -18,6 +18,7 @@ public class SonarScanTask extends BaseGoPlugin {
 
     public static final String ISSUE_TYPE_FAIL = "IssueTypeFail";
     public static final String SONAR_API_URL = "SonarApiUrl";
+    public static final String SONAR_API_KEY = "SonarApiKey";
     public static final String SONAR_PROJECT_KEY = "SonarProjectKey";
     public static final String STAGE_NAME = "StageName";
     public static final String JOB_NAME = "JobName";
@@ -93,6 +94,7 @@ public class SonarScanTask extends BaseGoPlugin {
                 .add(SONAR_PROJECT_KEY, "", Required.YES)
                 .add(ISSUE_TYPE_FAIL, "error", Required.YES)
                 .add(SONAR_API_URL, "", Required.YES)
+                .add(SONAR_API_KEY, "", Required.NO)
                 .toMap();
     }
 

@@ -19,11 +19,15 @@ public abstract class TaskExecutor {
     public static final String REGEX_URL_CREDS = "(?<=://)[^:@]+(:[^@]+)?(?=@)";
     public static final String GO_WORKING_DIRECTORY = "GO_WORKING_DIRECTORY";
 
-    protected JobConsoleLogger console;
+    protected static JobConsoleLogger console;
     protected Context context;
     protected Map config; // contains a key value pair <Key, Value> where Value is a map with content  {secure=boolean, value=string, required=boolean}
     protected ConfigVars configVars;
 
+    public static JobConsoleLogger getLogger() {
+    	return console;
+    }
+    
     public TaskExecutor(JobConsoleLogger console, Context context, Map config) {
 
         // replace parameters and environment variables

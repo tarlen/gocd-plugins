@@ -9,6 +9,6 @@ mvn install:install-file \
 \
 mvn clean \
 package \
--DskipTests && \
-\
-mvn cobertura:cobertura
+-DskipTests
+
+#mvn cobertura:cobertura
