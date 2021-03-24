@@ -7,3 +7,4 @@ Validate SonarQube quality gates from your go.cd pipeline. Checks if a specific 
 - Added support for SonarQube API Key to UI
 - Removed failing tests
 
+To build, run `mvn package`
